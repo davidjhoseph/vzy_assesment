@@ -38,27 +38,18 @@
         </div>
       </div>
 
-      <div class="navigation-buttons">
-        <button
-          v-if="currentQuestionIndex > 0"
-          @click="previousQuestion"
-          class="nav-button">
-          ← Previous
-        </button>
-        <button
-          v-if="hasVoted && !quizComplete"
-          @click="nextQuestion"
-          class="nav-button">
-          Next →
-        </button>
-        <button
-          v-if="quizComplete"
-          @click="restartQuiz"
-          class="nav-button restart">
-          Restart Quiz
-        </button>
-      </div>
     </template>
+    <div class="navigation-buttons">
+      <button v-if="currentQuestionIndex > 0 && !quizComplete" @click="previousQuestion" class="nav-button">
+        ← Previous
+      </button>
+      <button v-if="hasVoted && !quizComplete" @click="nextQuestion" class="nav-button">
+        Next →
+      </button>
+      <button v-if="quizComplete" @click="restartQuiz" class="nav-button restart">
+        Restart Quiz
+      </button>
+    </div>
 
   </div>
 </template>
