@@ -166,70 +166,84 @@ const restartQuiz = () => {
 
 <style scoped>
 .poll-container {
-  max-width: 600px;
+  max-width: 800px;
   margin: 2rem auto;
-  padding: 2rem;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+  border-radius: 20px;
+  box-shadow: 
+    0 10px 20px rgba(0, 0, 0, 0.1),
+    0 6px 6px rgba(0, 0, 0, 0.06);
   position: relative;
-  transition: transform 0.3s ease-in-out;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .poll-container.slide-left {
-  transform: translateX(-100%);
+  transform: translateX(-100%) scale(0.9);
   opacity: 0;
 }
 
 .poll-container.slide-right {
-  transform: translateX(100%);
+  transform: translateX(100%) scale(0.9);
   opacity: 0;
 }
 
 .poll-question {
-  margin-bottom: 1.5rem;
-  color: #2c3e50;
-  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: #1a1a1a;
+  font-size: 1.8rem;
   text-align: center;
+  font-weight: 600;
+  line-height: 1.4;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
 }
 
 .progress {
   text-align: center;
   color: #666;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
 }
 
 .score-display {
   text-align: center;
   color: #2c3e50;
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 8px;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 2rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .options-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
 }
 
 .option {
-  padding: 1rem;
+  padding: 1.25rem;
   border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  background: white;
 }
 
 .option:hover:not(.voted) {
-  border-color: #3498db;
-  transform: translateY(-2px);
+  border-color: #6366f1;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(99, 102, 241, 0.15);
 }
 
 .option.voted {
@@ -237,13 +251,15 @@ const restartQuiz = () => {
 }
 
 .option.correct {
-  border-color: #2ecc71;
-  background-color: rgba(46, 204, 113, 0.1);
+  border-color: #10b981;
+  background: linear-gradient(145deg, #ecfdf5, #d1fae5);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .option.incorrect {
-  border-color: #e74c3c;
-  background-color: rgba(231, 76, 60, 0.1);
+  border-color: #ef4444;
+  background: linear-gradient(145deg, #fef2f2, #fee2e2);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 .option-content {
@@ -252,55 +268,100 @@ const restartQuiz = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 }
 
 .option-text {
-  color: #2c3e50;
+  color: #1f2937;
   font-weight: 500;
+  font-size: 1.1rem;
+  flex-grow: 1;
 }
 
 .result-indicator {
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
+  opacity: 0;
+  animation: fadeIn 0.5s forwards;
 }
 
 .navigation-buttons {
   display: flex;
-  justify-content: space-between;
-  margin-top: 2rem;
-  gap: 1rem;
+  justify-content: center;
+  margin-top: 2.5rem;
+  gap: 1.5rem;
 }
 
 .nav-button {
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 6px;
-  background-color: #3498db;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .nav-button:hover {
-  background-color: #2980b9;
   transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
 }
 
 .nav-button.restart {
-  background-color: #2ecc71;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .nav-button.restart:hover {
-  background-color: #27ae60;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
 }
 
-/* Fade transition */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease;
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
+.fade-enter-active {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.fade-leave-active {
+  animation: fadeIn 0.5s ease-in reverse;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .poll-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  .poll-question {
+    font-size: 1.5rem;
+  }
+
+  .options-container {
+    grid-template-columns: 1fr;
+  }
+
+  .navigation-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nav-button {
+    width: 100%;
+  }
 }
 </style>
