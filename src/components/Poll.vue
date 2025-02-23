@@ -1,61 +1,62 @@
 <template>
   <div class="poll-container" :class="{ 'slide-left': slideLeft, 'slide-right': slideRight }">
     <div class="score-display" v-if="quizComplete">
-      Final Score: {{ score }}/{{ questions.length }} ({{ Math.round((score/questions.length) * 100) }}%)
+      Final Score: {{ score }}/{{ questions.length }} ({{ Math.round((score / questions.length) * 100) }}%)
     </div>
     <div v-else class="progress">
       Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}
     </div>
-    
-    <h2 class="poll-question">{{ currentQuestion.question }}</h2>
-    
-    <div class="options-container">
-      <div 
-        v-for="(option, index) in currentQuestion.options" 
-        :key="index"
-        class="option"
-        :class="{
-          'voted': currentQuestionState.answered,
-          'correct': currentQuestionState.answered && index === currentQuestion.correctAnswer,
-          'incorrect': currentQuestionState.answered && currentQuestionState.selectedOption === index && index !== currentQuestion.correctAnswer,
-          'disabled': currentQuestionState.answered
-        }"
-        @click="vote(index)"
-      >
-        <div class="option-content">
-          <span class="option-text">{{ option }}</span>
-          <transition name="fade">
-            <div v-if="currentQuestionState.answered" class="result-indicator">
-              {{ index === currentQuestion.correctAnswer ? '✓' : (currentQuestionState.selectedOption === index ? '✗' : '') }}
-            </div>
-          </transition>
+    <template v-if="!quizComplete">
+
+      <h2 class="poll-question">{{ currentQuestion.question }}</h2>
+
+      <div class="options-container">
+        <div
+          v-for="(option, index) in currentQuestion.options"
+          :key="index"
+          class="option"
+          :class="{
+            'voted': currentQuestionState.answered,
+            'correct': currentQuestionState.answered && index === currentQuestion.correctAnswer,
+            'incorrect': currentQuestionState.answered && currentQuestionState.selectedOption === index && index !== currentQuestion.correctAnswer,
+            'disabled': currentQuestionState.answered
+          }"
+          @click="vote(index)">
+          <div class="option-content">
+            <span class="option-text">{{ option }}</span>
+            <transition name="fade">
+              <div v-if="currentQuestionState.answered" class="result-indicator">
+                {{ index === currentQuestion.correctAnswer ? '✓' : (currentQuestionState.selectedOption === index ? '✗'
+                  :
+                '') }}
+              </div>
+            </transition>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="navigation-buttons">
-      <button 
-        v-if="currentQuestionIndex > 0" 
-        @click="previousQuestion" 
-        class="nav-button"
-      >
-        ← Previous
-      </button>
-      <button 
-        v-if="hasVoted && !quizComplete" 
-        @click="nextQuestion" 
-        class="nav-button"
-      >
-        Next →
-      </button>
-      <button 
-        v-if="quizComplete" 
-        @click="restartQuiz" 
-        class="nav-button restart"
-      >
-        Restart Quiz
-      </button>
-    </div>
+      <div class="navigation-buttons">
+        <button
+          v-if="currentQuestionIndex > 0"
+          @click="previousQuestion"
+          class="nav-button">
+          ← Previous
+        </button>
+        <button
+          v-if="hasVoted && !quizComplete"
+          @click="nextQuestion"
+          class="nav-button">
+          Next →
+        </button>
+        <button
+          v-if="quizComplete"
+          @click="restartQuiz"
+          class="nav-button restart">
+          Restart Quiz
+        </button>
+      </div>
+    </template>
+
   </div>
 </template>
 
@@ -138,7 +139,7 @@ const vote = (index) => {
 
   selectedOption.value = index
   hasVoted.value = true
-  
+
   // Store the answer state
   questionStates.value[currentQuestionIndex.value] = {
     answered: true,
@@ -152,12 +153,15 @@ const vote = (index) => {
 }
 
 const nextQuestion = () => {
+  // Check if we're at the last question
+  if (currentQuestionIndex.value >= questions.length - 1) {
+    quizComplete.value = true
+    return
+  }
+
   slideLeft.value = true
   setTimeout(() => {
     currentQuestionIndex.value++
-    if (currentQuestionIndex.value >= questions.length) {
-      quizComplete.value = true
-    }
     // Set the state based on whether the next question was answered
     const nextState = questionStates.value[currentQuestionIndex.value]
     hasVoted.value = nextState?.answered || false
@@ -167,6 +171,8 @@ const nextQuestion = () => {
 }
 
 const previousQuestion = () => {
+  if (currentQuestionIndex.value <= 0) return
+
   slideRight.value = true
   setTimeout(() => {
     currentQuestionIndex.value--
@@ -199,7 +205,7 @@ const restartQuiz = () => {
   padding: 2.5rem;
   background: linear-gradient(145deg, #ffffff, #f0f0f0);
   border-radius: 20px;
-  box-shadow: 
+  box-shadow:
     0 10px 20px rgba(0, 0, 0, 0.1),
     0 6px 6px rgba(0, 0, 0, 0.06);
   position: relative;
@@ -364,6 +370,7 @@ const restartQuiz = () => {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
