@@ -269,12 +269,17 @@ onUnmounted(() => {
 
 .options-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1rem;
   margin: 2rem 0;
+  width: 100%;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .option {
+  width: 100%;
   padding: 1.25rem;
   border: 2px solid #e2e8f0;
   border-radius: 16px;
