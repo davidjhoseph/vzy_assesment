@@ -15,17 +15,18 @@
         :key="index"
         class="option"
         :class="{
-          'voted': hasVoted,
-          'correct': hasVoted && index === currentQuestion.correctAnswer,
-          'incorrect': hasVoted && selectedOption === index && index !== currentQuestion.correctAnswer
+          'voted': currentQuestionState.answered,
+          'correct': currentQuestionState.answered && index === currentQuestion.correctAnswer,
+          'incorrect': currentQuestionState.answered && currentQuestionState.selectedOption === index && index !== currentQuestion.correctAnswer,
+          'disabled': currentQuestionState.answered
         }"
-        @click="!hasVoted && vote(index)"
+        @click="vote(index)"
       >
         <div class="option-content">
           <span class="option-text">{{ option }}</span>
           <transition name="fade">
-            <div v-if="hasVoted" class="result-indicator">
-              {{ index === currentQuestion.correctAnswer ? '✓' : (selectedOption === index ? '✗' : '') }}
+            <div v-if="currentQuestionState.answered" class="result-indicator">
+              {{ index === currentQuestion.correctAnswer ? '✓' : (currentQuestionState.selectedOption === index ? '✗' : '') }}
             </div>
           </transition>
         </div>
@@ -68,6 +69,12 @@ const score = ref(0)
 const quizComplete = ref(false)
 const slideLeft = ref(false)
 const slideRight = ref(false)
+
+// Track answers for each question
+const questionStates = ref(Array(10).fill().map(() => ({
+  answered: false,
+  selectedOption: null
+})))
 
 const questions = [
   {
@@ -123,10 +130,22 @@ const questions = [
 ]
 
 const currentQuestion = computed(() => questions[currentQuestionIndex.value])
+const currentQuestionState = computed(() => questionStates.value[currentQuestionIndex.value])
 
 const vote = (index) => {
+  // Only allow voting if question hasn't been answered
+  if (currentQuestionState.value.answered) return
+
   selectedOption.value = index
   hasVoted.value = true
+  
+  // Store the answer state
+  questionStates.value[currentQuestionIndex.value] = {
+    answered: true,
+    selectedOption: index
+  }
+
+  // Only increment score if this is the first time answering this question
   if (index === currentQuestion.value.correctAnswer) {
     score.value++
   }
@@ -135,12 +154,14 @@ const vote = (index) => {
 const nextQuestion = () => {
   slideLeft.value = true
   setTimeout(() => {
-    hasVoted.value = false
-    selectedOption.value = null
     currentQuestionIndex.value++
     if (currentQuestionIndex.value >= questions.length) {
       quizComplete.value = true
     }
+    // Set the state based on whether the next question was answered
+    const nextState = questionStates.value[currentQuestionIndex.value]
+    hasVoted.value = nextState?.answered || false
+    selectedOption.value = nextState?.selectedOption ?? null
     slideLeft.value = false
   }, 300)
 }
@@ -148,9 +169,11 @@ const nextQuestion = () => {
 const previousQuestion = () => {
   slideRight.value = true
   setTimeout(() => {
-    hasVoted.value = false
-    selectedOption.value = null
     currentQuestionIndex.value--
+    // Restore the previous question's state
+    const prevState = questionStates.value[currentQuestionIndex.value]
+    hasVoted.value = prevState.answered
+    selectedOption.value = prevState.selectedOption
     slideRight.value = false
   }, 300)
 }
@@ -161,6 +184,11 @@ const restartQuiz = () => {
   selectedOption.value = null
   score.value = 0
   quizComplete.value = false
+  // Reset all question states
+  questionStates.value = Array(10).fill().map(() => ({
+    answered: false,
+    selectedOption: null
+  }))
 }
 </script>
 
@@ -260,6 +288,16 @@ const restartQuiz = () => {
   border-color: #ef4444;
   background: linear-gradient(145deg, #fef2f2, #fee2e2);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.option.disabled {
+  cursor: not-allowed !important;
+  opacity: 0.8;
+}
+
+.option.disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .option-content {
