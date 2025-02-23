@@ -6,10 +6,10 @@
     <div class="score-display" v-if="quizComplete">
       Final Score: {{ score }}/{{ questions.length }} ({{ Math.round((score / questions.length) * 100) }}%)
     </div>
-    <div v-else class="progress">
-      Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}
-    </div>
-    <template v-if="!quizComplete">
+    <template v-else>
+      <div class="progress">
+        Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}
+      </div>
 
       <h2 class="poll-question">{{ currentQuestion.question }}</h2>
 
