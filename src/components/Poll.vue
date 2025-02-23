@@ -1,5 +1,8 @@
 <template>
   <div class="poll-container" :class="{ 'slide-left': slideLeft, 'slide-right': slideRight }">
+    <transition name="error-slide">
+      <div v-if="error" class="error-message">{{ error }}</div>
+    </transition>
     <div class="score-display" v-if="quizComplete">
       Final Score: {{ score }}/{{ questions.length }} ({{ Math.round((score / questions.length) * 100) }}%)
     </div>
@@ -28,7 +31,7 @@
               <div v-if="currentQuestionState.answered" class="result-indicator">
                 {{ index === currentQuestion.correctAnswer ? '✓' : (currentQuestionState.selectedOption === index ? '✗'
                   :
-                '') }}
+                  '') }}
               </div>
             </transition>
           </div>
@@ -61,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 
 const currentQuestionIndex = ref(0)
 const hasVoted = ref(false)
@@ -70,12 +73,20 @@ const score = ref(0)
 const quizComplete = ref(false)
 const slideLeft = ref(false)
 const slideRight = ref(false)
+const error = ref(null)
+const errorTimeout = ref(null)
 
 // Track answers for each question
 const questionStates = ref(Array(10).fill().map(() => ({
   answered: false,
   selectedOption: null
 })))
+
+const showError = (message) => {
+  error.value = message
+  if (errorTimeout.value) clearTimeout(errorTimeout.value)
+  errorTimeout.value = setTimeout(() => error.value = null, 3000)
+}
 
 const questions = [
   {
@@ -134,26 +145,30 @@ const currentQuestion = computed(() => questions[currentQuestionIndex.value])
 const currentQuestionState = computed(() => questionStates.value[currentQuestionIndex.value])
 
 const vote = (index) => {
-  // Only allow voting if question hasn't been answered
-  if (currentQuestionState.value.answered) return
+  if (currentQuestionState.value.answered) {
+    showError('This question has already been answered')
+    return
+  }
 
   selectedOption.value = index
   hasVoted.value = true
 
-  // Store the answer state
   questionStates.value[currentQuestionIndex.value] = {
     answered: true,
     selectedOption: index
   }
 
-  // Only increment score if this is the first time answering this question
   if (index === currentQuestion.value.correctAnswer) {
     score.value++
   }
 }
 
 const nextQuestion = () => {
-  // Check if we're at the last question
+  if (!hasVoted.value) {
+    showError('Please answer the current question first')
+    return
+  }
+
   if (currentQuestionIndex.value >= questions.length - 1) {
     quizComplete.value = true
     return
@@ -162,7 +177,6 @@ const nextQuestion = () => {
   slideLeft.value = true
   setTimeout(() => {
     currentQuestionIndex.value++
-    // Set the state based on whether the next question was answered
     const nextState = questionStates.value[currentQuestionIndex.value]
     hasVoted.value = nextState?.answered || false
     selectedOption.value = nextState?.selectedOption ?? null
@@ -171,12 +185,14 @@ const nextQuestion = () => {
 }
 
 const previousQuestion = () => {
-  if (currentQuestionIndex.value <= 0) return
+  if (currentQuestionIndex.value <= 0) {
+    showError('You are at the first question')
+    return
+  }
 
   slideRight.value = true
   setTimeout(() => {
     currentQuestionIndex.value--
-    // Restore the previous question's state
     const prevState = questionStates.value[currentQuestionIndex.value]
     hasVoted.value = prevState.answered
     selectedOption.value = prevState.selectedOption
@@ -196,6 +212,10 @@ const restartQuiz = () => {
     selectedOption: null
   }))
 }
+
+onUnmounted(() => {
+  if (errorTimeout.value) clearTimeout(errorTimeout.value)
+})
 </script>
 
 <style scoped>
@@ -362,6 +382,39 @@ const restartQuiz = () => {
 
 .nav-button.restart:hover {
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.error-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(220, 38, 38, 0.1);
+  z-index: 1000;
+  font-weight: 500;
+  min-width: 200px;
+  text-align: center;
+}
+
+.error-slide-enter-active,
+.error-slide-leave-active {
+  transition: all 0.3s ease-in-out;
+}
+
+.error-slide-enter-from,
+.error-slide-leave-to {
+  transform: translate(-50%, -100%);
+  opacity: 0;
+}
+
+.error-slide-enter-to,
+.error-slide-leave-from {
+  transform: translate(-50%, 0);
+  opacity: 1;
 }
 
 /* Animations */
